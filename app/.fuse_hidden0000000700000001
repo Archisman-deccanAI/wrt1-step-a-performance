@@ -1,0 +1,73 @@
+[debug] [2026-10-14T10:21:32.578Z] ----------------------------------------------------------------------
+[debug] [2026-10-14T10:21:32.579Z] Command:       /usr/bin/node /sessions/rcw-01ehjs9n1g4xuxtg8dwjwwxa/.npm-global/bin/firebase deploy --only firestore:rules --project wrt1-performance --non-interactive
+[debug] [2026-10-14T10:21:32.580Z] CLI Version:   15.33.0
+[debug] [2026-10-14T10:21:32.580Z] Platform:      linux
+[debug] [2026-10-14T10:21:32.580Z] Node Version:  v22.23.2
+[debug] [2026-10-14T10:21:32.580Z] Detected Agent: unknown
+[debug] [2026-10-14T10:21:32.580Z] Time:          Wed Oct 14 2026 10:21:32 GMT+0000 (Coordinated Universal Time)
+[debug] [2026-10-14T10:21:32.580Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-10-14T10:21:32.588Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2026-10-14T10:21:33.337Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-10-14T10:21:33.574Z] Running auto auth
+[debug] [2026-10-14T10:21:33.575Z] [iam] checking project wrt1-performance for permissions ["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]
+[debug] [2026-10-14T10:21:33.575Z] No OAuth tokens found
+[debug] [2026-10-14T10:21:33.576Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/wrt1-performance:testIamPermissions [none]
+[debug] [2026-10-14T10:21:33.576Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/wrt1-performance:testIamPermissions  x-goog-user-project=wrt1-performance
+[debug] [2026-10-14T10:21:33.576Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/wrt1-performance:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get"]}
+[debug] [2026-10-14T10:21:34.041Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2026-10-14T10:21:34.041Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2026-10-14T10:21:35.012Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/wrt1-performance:testIamPermissions 200
+[debug] [2026-10-14T10:21:35.012Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/wrt1-performance:testIamPermissions {"permissions":["datastore.indexes.list","firebase.projects.get"]}
+[debug] [2026-10-14T10:21:35.013Z] [iam] error while checking permissions, command may fail: Authorization failed. This account is missing the following required permissions on project wrt1-performance:
+
+  datastore.indexes.create
+  datastore.indexes.delete
+  datastore.indexes.update
+[info] 
+[info] === Deploying to 'wrt1-performance'...
+[info] 
+[info] i  deploying firestore 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2026-10-14T10:21:35.014Z] No OAuth tokens found
+[debug] [2026-10-14T10:21:35.014Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/wrt1-performance/services/firestore.googleapis.com [none]
+[debug] [2026-10-14T10:21:35.014Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/wrt1-performance/services/firestore.googleapis.com  x-goog-user-project=wrt1-performance
+[debug] [2026-10-14T10:21:37.020Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/wrt1-performance/services/firestore.googleapis.com 403
+[debug] [2026-10-14T10:21:37.020Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/wrt1-performance/services/firestore.googleapis.com [omitted]
+[error] 
+[error] Error: Request to https://serviceusage.googleapis.com/v1/projects/wrt1-performance/services/firestore.googleapis.com had HTTP Error: 403, Permission denied to get service [firestore.googleapis.com]
+Help Token: Ad9DraDC8Ta2YPKPZR1B_xHXD9ZgSvWng3ST3zdwtTdHRAMdH1F_DBTjNtOtJg5fM2Lkm8BZcCRJIcY96fIwKxofuTySiaOA86mPE6m0gZZf6p23
+[debug] [2026-10-14T10:21:37.022Z] Error Context: {
+  "body": {
+    "error": {
+      "code": 403,
+      "message": "Permission denied to get service [firestore.googleapis.com]\nHelp Token: Ad9DraDC8Ta2YPKPZR1B_xHXD9ZgSvWng3ST3zdwtTdHRAMdH1F_DBTjNtOtJg5fM2Lkm8BZcCRJIcY96fIwKxofuTySiaOA86mPE6m0gZZf6p23",
+      "status": "PERMISSION_DENIED",
+      "details": [
+        {
+          "@type": "type.googleapis.com/google.rpc.PreconditionFailure",
+          "violations": [
+            {
+              "type": "googleapis.com",
+              "subject": "?error_code=110002&service=serviceusage.googleapis.com&permission=serviceusage.services.get&error_info_id=CiQwMWExMzllZS04YzM4LTdmMWUtYTVmNy0yMTRiYzRiZmM3YjASPXByb2plY3RudW1iZXJzLzkzMTU2MTE5NjIzOS9zZXJ2aWNlcy9maXJlc3RvcmUuZ29vZ2xlYXBpcy5jb20%3D&troubleshooter_url=https://console.cloud.google.com/iam-admin/troubleshooter/summary;errorId%3DCiQwMWExMzllZS04YzM4LTdmMWUtYTVmNy0yMTRiYzRiZmM3YjASPXByb2plY3RudW1iZXJzLzkzMTU2MTE5NjIzOS9zZXJ2aWNlcy9maXJlc3RvcmUuZ29vZ2xlYXBpcy5jb20%253D"
+            }
+          ]
+        },
+        {
+          "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+          "reason": "AUTH_PERMISSION_DENIED",
+          "domain": "serviceusage.googleapis.com",
+          "metadata": {
+            "service": "serviceusage.googleapis.com",
+            "permission": "serviceusage.services.get",
+            "error_info_id": "CiQwMWExMzllZS04YzM4LTdmMWUtYTVmNy0yMTRiYzRiZmM3YjASPXByb2plY3RudW1iZXJzLzkzMTU2MTE5NjIzOS9zZXJ2aWNlcy9maXJlc3RvcmUuZ29vZ2xlYXBpcy5jb20=",
+            "troubleshooter_url": "https://console.cloud.google.com/iam-admin/troubleshooter/summary;errorId=CiQwMWExMzllZS04YzM4LTdmMWUtYTVmNy0yMTRiYzRiZmM3YjASPXByb2plY3RudW1iZXJzLzkzMTU2MTE5NjIzOS9zZXJ2aWNlcy9maXJlc3RvcmUuZ29vZ2xlYXBpcy5jb20%3D"
+          }
+        }
+      ]
+    }
+  },
+  "response": {
+    "statusCode": 403
+  }
+}

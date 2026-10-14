@@ -1,0 +1,6 @@
+{
+  "as_of": "2026-10-14T13:41:00",
+  "window_start": "2026-09-30",
+  "location": "Hyd",
+  "note": "Sample snapshot pulled from gold.wrt_item_label_trajectory for v0 dev mode. Replace with live Firestore data in production."
+}

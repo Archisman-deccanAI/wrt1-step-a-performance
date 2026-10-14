@@ -1,0 +1,35 @@
+# ---- secrets: never commit ----
+ingestion/serviceAccount.json
+serviceAccount.json
+**/.env.local
+.env.local
+.env
+
+# ---- data exports (contain real annotator names/emails) ----
+wrt_load*.json
+
+# ---- node ----
+node_modules/
+app/node_modules/
+app/dist/
+dist/
+.vite/
+
+# ---- python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# ---- build scratch / local ----
+appbuild/
+
+# ---- os / editor junk ----
+desktop.ini
+**/desktop.ini
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/

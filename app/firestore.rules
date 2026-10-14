@@ -1,0 +1,79 @@
+rules_version = '2';
+
+// metric_slice, correction, meta, identity_map are written server-side by the
+// ingestion job (Admin SDK bypasses rules), so they stay read-only to clients.
+// Access model:
+//   - annotators (deccanteam.us / teamdeccan.com): read only their own data
+//   - deccan.ai domain (staff): read everything (overall view)
+//   - trainers (app_user role): staff read + resolve flags
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function email() { return request.auth.token.email; }
+    function domainOk() {
+      return email().matches('.*@(deccanteam[.]us|teamdeccan[.]com|deccan[.]ai)$');
+    }
+    function isTrainer() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/app_user/$(email()))
+        && get(/databases/$(database)/documents/app_user/$(email())).data.role in ['trainer', 'admin'];
+    }
+    function isDeccan() { return signedIn() && email().matches('.*@deccan[.]ai$'); }
+    function canReadAll() { return isTrainer() || isDeccan(); }
+
+    match /meta/{doc} {
+      allow read: if signedIn() && domainOk();
+      allow write: if false;
+    }
+
+    match /metric_slice/{uid} {
+      allow read: if signedIn() && domainOk() && (uid == email() || canReadAll());
+      allow write: if false;
+    }
+
+    match /correction/{id} {
+      allow read: if signedIn() && domainOk()
+        && (resource.data.annotator_email == email() || canReadAll());
+      allow write: if false;
+    }
+
+    // one bundle doc per annotator (doc id == their email) with all their rows
+    match /correction_bundle/{uid} {
+      allow read: if signedIn() && domainOk() && (uid == email() || canReadAll());
+      allow write: if false;
+    }
+
+    match /app_user/{uid} {
+      allow read: if signedIn() && (uid == email() || canReadAll());
+      allow write: if false;
+    }
+
+    match /identity_map/{id} {
+      allow read: if canReadAll();
+      allow write: if false;
+    }
+
+    // confusion aggregate for the coaching view: staff-wide read only
+    match /agg/{doc} {
+      allow read: if canReadAll();
+      allow write: if false;
+    }
+
+    match /flag/{id} {
+      allow read: if signedIn() && domainOk()
+        && (resource.data.annotator_email == email() || canReadAll());
+
+      allow create: if signedIn() && domainOk()
+        && request.resource.data.raised_by == email()
+        && request.resource.data.annotator_email == email()
+        && request.resource.data.status == 'open';
+
+      allow update: if isTrainer()
+        && request.resource.data.status == 'resolved'
+        && request.resource.data.resolved_by == email();
+
+      allow delete: if false;
+    }
+  }
+}

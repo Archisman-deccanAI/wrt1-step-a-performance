@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WRT1 one-tap refresh</title>
+<style>
+  :root{--ink:#111113;--muted:#6b6b73;--line:#e6e3de;--bg:#f6f3f0;--card:#fff;--blue:#175fff;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:720px;margin:0 auto;padding:40px 20px 80px}
+  h1{font-size:24px;margin:0 0 4px}
+  .sub{color:var(--muted);margin:0 0 28px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin:16px 0;box-shadow:0 1px 10px rgba(17,17,19,.04)}
+  .bm{display:inline-block;background:var(--blue);color:#fff;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:10px;font-size:15px;cursor:grab}
+  .step{display:flex;gap:12px;margin:14px 0}
+  .num{flex:0 0 26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700}
+  code{background:#eceae6;padding:1px 6px;border-radius:5px;font-size:13px}
+  textarea{width:100%;height:120px;margin-top:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;border:1px solid var(--line);border-radius:8px;padding:10px;background:#fbfaf8;color:#333}
+  .muted{color:var(--muted);font-size:13px}
+  .pill{display:inline-block;background:#eaf0ff;color:#1b3a7a;border:1px solid #d5e2ff;border-radius:999px;padding:2px 10px;font-size:12px;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="pill">WRT1 Step A Performance</span>
+  <h1>One-tap data refresh</h1>
+  <p class="sub">Pull fresh Step B numbers from Superset into the app in a single click.</p>
+
+  <div class="card">
+    <strong>Install once:</strong> drag this button up to your bookmarks bar.
+    <div style="margin-top:14px"><a class="bm" id="bm" href="#">&#9889; Refresh WRT1 data</a></div>
+    <p class="muted" style="margin-top:14px">Can't drag? Create a new bookmark manually and paste the code below as its URL.</p>
+    <textarea id="code" readonly></textarea>
+  </div>
+
+  <div class="card">
+    <strong>Each time you want fresh numbers:</strong>
+    <div class="step"><div class="num">1</div><div>Open <code>superset.soulhq.ai</code> and make sure you're signed in.</div></div>
+    <div class="step"><div class="num">2</div><div>Click the <strong>Refresh WRT1 data</strong> bookmark. It runs the two queries and downloads <code>wrt_load.json</code> (takes about 15 seconds; you'll get a confirmation popup).</div></div>
+    <div class="step"><div class="num">3</div><div>That file lands in your app folder, and the loader pushes it live to the app automatically. The dashboards update within the hour.</div></div>
+  </div>
+
+  <p class="muted">The export pulls the Hyderabad Step B window from 30 September onward: per-person scores and every task Step B changed. It writes a single file and changes nothing in Superset.</p>
+</div>
+
+<textarea id="src" style="display:none">javascript:(async()=>{try{const base='https://superset.soulhq.ai',WIN='2026-09-30',LOC='Hyd';const csrf=await fetch(base+'/api/v1/security/csrf_token/',{credentials:'include'}).then(r=>r.json()).then(j=>j.result);const run=async(sql)=>{const r=await fetch(base+'/api/v1/sqllab/execute/',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json','X-CSRFToken':csrf},body:JSON.stringify({database_id:1,runAsync:false,sql,schema:'gold',queryLimit:200000,expand_data:true})});const j=await r.json();if(!j.data&&(j.error||j.message))throw new Error(j.error||j.message);return j.data||[]};const sliceSQL="WITH atdp_user AS (SELECT id AS atdp_id, MAX(user_id) AS uid FROM bronze.annotation_task_data_points GROUP BY id) SELECT au.email AS annotator_email, t.step_a_agent AS display_name, COUNT(*) AS step_a_tasks, COUNT(t.step_b_label) AS step_b_reviewed, ROUND(100.0*COUNT(t.step_b_label)/COUNT(*),1) AS step_b_coverage_pct, SUM(CASE WHEN t.label_mismatch=1 THEN 1 ELSE 0 END) AS step_b_mismatches, ROUND(100.0*SUM(CASE WHEN t.label_mismatch=1 THEN 1 ELSE 0 END)/NULLIF(COUNT(t.step_b_label),0),1) AS err_pct, ROUND(AVG(t.step_a_item_submission_mins),2) AS avg_aht_mins, CAST(MAX(t.step_b_annotated_date) AS date) AS last_step_b_date FROM gold.wrt_item_label_trajectory t LEFT JOIN atdp_user a ON a.atdp_id=t.atdp_id LEFT JOIN bronze.annotation_users au ON au.id=a.uid WHERE t.step_a_annotated_date >= DATE '"+WIN+"' AND t.step_a_agent_location='"+LOC+"' GROUP BY au.email, t.step_a_agent HAVING au.email IS NOT NULL ORDER BY step_a_tasks DESC";const corrSQL="WITH atdp_user AS (SELECT id AS atdp_id, MAX(user_id) AS uid FROM bronze.annotation_task_data_points GROUP BY id), keyd AS (SELECT DISTINCT ON (atdp_id) atdp_id, product_name, brand_nm, prod_type_nm, primary_image_url, product_short_description FROM gold.wrt_all_key ORDER BY atdp_id, product_name) SELECT au.email AS annotator_email, t.task_id, t.cosmo_batch_id AS batch, LEFT(t.step_a_label,120) AS step_a_label, LEFT(t.step_b_label,120) AS step_b_label, CAST(t.step_b_annotated_date AS date) AS date, LEFT(k.product_name,160) AS product_name, k.brand_nm AS brand, k.prod_type_nm AS prod_type, k.primary_image_url AS image_url, LEFT(regexp_replace(COALESCE(k.product_short_description,''),'<[^>]*>',' ','g'),200) AS description FROM gold.wrt_item_label_trajectory t LEFT JOIN atdp_user a ON a.atdp_id=t.atdp_id LEFT JOIN bronze.annotation_users au ON au.id=a.uid LEFT JOIN keyd k ON k.atdp_id=t.atdp_id WHERE t.step_a_annotated_date >= DATE '"+WIN+"' AND t.step_a_agent_location='"+LOC+"' AND t.step_b_label IS NOT NULL AND t.label_mismatch=1 AND au.email IS NOT NULL";const slices=await run(sliceSQL);const corrections=await run(corrSQL);const payload={as_of:WIN,location:LOC,exported_at:new Date().toISOString(),slices,corrections};const blob=new Blob([JSON.stringify(payload)],{type:'application/octet-stream'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='wrt_load.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove()},3000);alert('WRT refresh exported: '+slices.length+' people, '+corrections.length+' rows.\nSaved wrt_load.json — it will load into the app shortly.');}catch(e){alert('WRT refresh failed: '+e.message+'\nMake sure you are signed in to Superset.');}})();</textarea>
+
+<script>
+  var src=document.getElementById('src').value.trim();
+  document.getElementById('code').value=src;
+  document.getElementById('bm').setAttribute('href',src);
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+name: WRT1 performance refresh
+
+on:
+  schedule:
+    - cron: "30 1 * * *"   # 01:30 UTC = 07:00 IST daily
+  workflow_dispatch: {}      # allow manual runs
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install -r ingestion/requirements.txt
+      - name: Write service account
+        run: echo "$FIREBASE_SA" > ${{ runner.temp }}/sa.json
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SA }}
+      - name: Run refresh
+        env:
+          SUPERSET_URL: https://superset.soulhq.ai
+          SUPERSET_USERNAME: ${{ secrets.SUPERSET_USERNAME }}
+          SUPERSET_PASSWORD: ${{ secrets.SUPERSET_PASSWORD }}
+          SUPERSET_DB_ID: "1"
+          TRAINER_EMAILS: ${{ secrets.TRAINER_EMAILS }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa.json
+        run: python ingestion/refresh.py
